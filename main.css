@@ -1,0 +1,62 @@
+body,html {margin: 0;padding :0;}
+.game-container {margin: 10;}
+table {
+    border-collapse: collapse;
+    float: left;
+    margin: 5px;
+}
+
+span {
+    display: inline-block;
+    padding: 5px;
+}
+
+.cover {
+    position:fixed;
+    padding:0;
+    margin:0;
+    width: 100%;
+    height: 100%;
+    background: white;
+}
+
+.pregame {
+    padding: 20px;
+}
+
+.info {
+    float: left;
+    width: 55px;
+}
+
+.insttructions {
+    float:left;
+    paddin: 5px;
+}
+
+#pause {
+    float: left;
+    padding: 10px;
+}
+
+.block {
+    height: 2em;
+    width: 2em;
+}
+
+.small-block {
+    height: 5px;
+    width: 5px;
+    padding: 0 ;
+    margin : 0;
+    background: grey;
+}
+
+.empty {background: grey;}
+.i {background: #00FFFF;}
+.j {background: #0000FF;}
+.l {background: #FFA500;}
+.o {background: #FFFF00;}
+.s {background: #00FF00;}
+.t {background: #AA00FF;}
+.z {background: #FF0000;}

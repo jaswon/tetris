@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <title>teturissu</title>
+        <link rel="stylesheet" type="text/css" href="main.css">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+        <script type='text/javascript' src='tetrisData.js'></script>
+        <script type='text/javascript' src="/rAF.js"></script>
+        <script type='text/javascript' src='game.js'></script>
+    </head>
+    <body>
+        <div class="cover">
+            <div class="pregame">
+                Click in the window to start the game.
+            </div>
+        </div>
+        <div class="game-container">
+            <div id="pause">PAUSE</div>
+            <table id="game"></table>
+            <div class="info">
+                <span id="score">0</span>
+                <table id="queue"></table>
+                <table id="hold"></table>
+            </div>
+            <div class="instructions">
+                Press escape to pause the game. <br>
+                Left/right arrow keys to move the piece. <br>
+                Z/X to rotate the piece. <br>
+                Space bar to hard drop. <br>
+                Down arrow key to soft drop. <br>
+                Shift to hold piece. <br>
+                Don't lose.
+            </div>
+        </div>
+    </body>
+</html>
