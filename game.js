@@ -393,7 +393,7 @@ var animate = function() {
 }
 
 //gogogo
-$('html').click(function() {
+$('html').one("click",function() {
     $(".cover").hide();
     // arrow keys
     $('body').on('keydown keyup', function(e) {
