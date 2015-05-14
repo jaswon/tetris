@@ -23,10 +23,17 @@ for (var i = 0 ; i < w ; i++) {
 // left up right down
 var keydown = [false,false,false,false]
 
+var shuffle = function(o){
+    for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    return o;
+};
+
 var randomPiece = function() {
     nextPiece.tetr = queue.shift();
-    queue.push(choice[Math.floor(Math.random()*choice.length)])
-    $(".queue").text(queue.toString())
+    //queue.push(choice[Math.floor(Math.random()*choice.length)])
+    if (6 > queue.length) {
+        queue.push.apply(queue, shuffle(choice.slice(0)))
+    }
     nextPiece.piece = pieces[nextPiece.tetr].map(function(arr) {
         return arr.slice();
     });
@@ -133,6 +140,13 @@ var attemptRotate = function ( dir ) {
 
 var initBoard = function() {
     board = [];
+    queue = [];
+    // for (var i = 0 ; i < 5 ; i++ ) {
+    //     queue.push(choice[Math.floor(Math.random()*choice.length)])
+    // }
+    queue.push.apply(queue, shuffle(choice.slice(0)))
+    randomPiece();
+    //holdPiece = {};
     for (var i = 0 ; i < h ; i++) {
         var row = [];
         for (var j = 0 ; j < w ; j++) {
@@ -160,6 +174,8 @@ var initBoard = function() {
     // $("td").hover(function() {
     //     mouseCol = parseInt($(this).index()) + 1;
     // });
+    drawQueue();
+    drawHold();
 }
 
 var drawPiece = function( table, place, piece ) {
@@ -244,6 +260,13 @@ var lockPiece = function() {
 var animate = function() {
     var exit = window.requestAnimationFrame( animate );
 
+    // pause
+    if ( keydown[27] ) { // esc
+        $("#pause").toggle();
+        pause = !pause;
+        keydown[27] = false;
+    }
+
     if (!pause) {
         // draw board
         for (var i = 0, row; row = tbl.rows[i]; i++) {
@@ -285,26 +308,75 @@ var animate = function() {
         }
         tick++;
 
+
+        // player input
         if ( tick % 5 == inputspeed ) {
-            if ( keydown[0] ){
+            if ( keydown[37] ){ // left arrow
                 attemptTransform(function(piece) {
                     piece.x--;
                     return piece;
                 })
             }
-            if ( keydown[2] ) {
+            if ( keydown[39] ) { // right arrow
                 attemptTransform(function(piece) {
                     piece.x++;
                     return piece;
                 })
             }
-            if ( keydown[3] ) {
+            if ( keydown[40] ) { // down arrow
                 attemptTransform(function(piece) {
                     piece.y++;
                     return piece;
                 })
             }
         }
+
+        if ( keydown[32] ) { // space
+            while (!contact(function(piece) {
+                piece.y++;return piece;
+            })) {
+                nextPiece.y++;
+            }
+            lockPiece();
+            keydown[32] = false;
+        }
+        if ( keydown[88] ) { // x
+            attemptRotate(-1);
+            keydown[88] = false;
+        }
+        if ( keydown[90] ) { // z
+            attemptRotate(1);
+            keydown[90] = false;
+        }
+        if ( keydown[16] ) { // shift
+            if (canHold) {
+                if (holdPiece) { // hold exists
+                    var tmp = JSON.parse(JSON.stringify(nextPiece));
+                    nextPiece = JSON.parse(JSON.stringify(holdPiece));
+                    nextPiece.piece = pieces[nextPiece.tetr].map(function(arr) {
+                        return arr.slice();
+                    });
+                    nextPiece.rot = 0;
+                    nextPiece.x = Math.floor((w-nextPiece.piece.length)/2);
+                    nextPiece.y = 0;
+                    holdPiece = JSON.parse(JSON.stringify(tmp));
+                } else {
+                    holdPiece = JSON.parse(JSON.stringify(nextPiece));
+                    holdPiece.piece = pieces[holdPiece.tetr].map(function(arr) {
+                        return arr.slice();
+                    });
+                    holdPiece.rot = 0;
+                    holdPiece.x = Math.floor((w-holdPiece.piece.length)/2);
+                    holdPiece.y = 0;
+                    randomPiece();
+                }
+                canHold = false;
+                drawHold();
+            }
+            keydown[16] = false;
+        }
+
+
 
         // clear piece
         board.forEach(function(row, ri){
@@ -324,81 +396,14 @@ var animate = function() {
 $('html').click(function() {
     $(".cover").hide();
     // arrow keys
-    $('body').keydown(function(e) {
-        if ([37,39,40].indexOf(e.which) != -1) {
-            keydown[e.which-37] = true;
-        } else {
-            switch (e.which) {
-                case 88: // x
-                    attemptRotate(-1);
-                    break;
-                case 90: // z
-                    attemptRotate(1);
-                    break;
-                case 27: // esc
-                    if (pause) {
-                        $("#pause").toggle("slow", function() {
-                            pause = false;
-                        });
-                    } else {
-                        pause = true;
-                        $("#pause").toggle("slow");
-                    }
-                    break;
-                case 32: // space
-                    while (!contact(function(piece) {
-                        piece.y++;return piece;
-                    })) {
-                        nextPiece.y++;
-                    }
-                    lockPiece();
-                    break;
-                case 16: // shift
-                    if (canHold) {
-                        if (holdPiece) { // hold exists
-                            var tmp = JSON.parse(JSON.stringify(nextPiece));
-                            nextPiece = JSON.parse(JSON.stringify(holdPiece));
-                            nextPiece.piece = pieces[nextPiece.tetr].map(function(arr) {
-                                return arr.slice();
-                            });
-                            nextPiece.rot = 0;
-                            nextPiece.x = Math.floor((w-nextPiece.piece.length)/2);
-                            nextPiece.y = 0;
-                            holdPiece = JSON.parse(JSON.stringify(tmp));
-                        } else {
-                            holdPiece = JSON.parse(JSON.stringify(nextPiece));
-                            holdPiece.piece = pieces[holdPiece.tetr].map(function(arr) {
-                                return arr.slice();
-                            });
-                            holdPiece.rot = 0;
-                            holdPiece.x = Math.floor((w-holdPiece.piece.length)/2);
-                            holdPiece.y = 0;
-                            randomPiece();
-                        }
-                        canHold = false;
-                        drawHold();
-                    }
-                    break;
-            }
-        }
-    })
-
-    $('body').keyup(function(e) {
-        if ([37,39,40].indexOf(e.which) != -1) {
-            keydown[e.which-37] = false;
-        }
+    $('body').on('keydown keyup', function(e) {
+        keydown[e.which] = (e.type == "keydown" ? true : false);
     })
 
     tbl = document.getElementById("game");
     qtbl = document.getElementById("queue");
     htbl = document.getElementById("hold");
-    for (var i = 0 ; i < 5 ; i++ ) {
-        queue.push(choice[Math.floor(Math.random()*choice.length)])
-    }
     $("#pause").css("display","none");
-    randomPiece();
     initBoard();
-    drawQueue();
-    drawHold();
     animate();
 });
